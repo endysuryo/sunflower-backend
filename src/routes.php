@@ -4,23 +4,18 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Ramsey\Uuid\Uuid;
 
-    $app->get('/[{name}]', function (Request $request, Response $response, array $args) use ($container) {
-        // Sample log message
-        $container->get('logger')->info("Slim-Skeleton '/' route");
+// API group activities
+$app->group('/api/activities', function () use ($app) {
 
-        // Render index view
-        return $container->get('renderer')->render($response, 'index.phtml', $args);
-    });
-
-    $app->get("/activities/", function (Request $request, Response $response){
-        $sql = "SELECT * FROM activities";
+    $app->get("/", function (Request $request, Response $response){
+        $sql = "SELECT * FROM activities ORDER BY created_at DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
         return $response->withJson(["status" => "success", "data" => $result], 200);
     });
 
-    $app->get("/activities/{id}", function (Request $request, Response $response, $args){
+    $app->get("/{id}", function (Request $request, Response $response, $args){
         $id = $args["id"];
         $sql = "SELECT * FROM activities WHERE id=:id";
         $stmt = $this->db->prepare($sql);
@@ -29,19 +24,21 @@ use Ramsey\Uuid\Uuid;
         return $response->withJson(["status" => "success", "data" => $result], 200);
     });
 
-    $app->post("/activities/", function (Request $request, Response $response){
+    $app->post("/", function (Request $request, Response $response){
         $uuid4 = Uuid::uuid4();
+        date_default_timezone_set('Asia/Jakarta');
 
         $new_activity = $request->getParsedBody();
 
-        $sql = "INSERT INTO activities (id, name, start_at, end_at) VALUE (:id, :name, :start_at, :end_at)";
+        $sql = "INSERT INTO activities VALUE (:id, :name, :location, :account_id, :created_at)";
         $stmt = $this->db->prepare($sql);
 
         $data = [
             ":id" =>  $uuid4->toString(),
             ":name" => $new_activity["name"],
-            ":start_at" => $new_activity["start_at"],
-            ":end_at" => $new_activity["end_at"]
+            ":location" => $new_activity["location"],
+            ":account_id" => $new_activity["account_id"],
+            ":created_at" => date("Y-m-d H:i:s")
         ];
 
         if($stmt->execute($data))
@@ -49,3 +46,19 @@ use Ramsey\Uuid\Uuid;
         
         return $response->withJson(["status" => "failed", "data" => "0"], 200);
     });
+
+    $app->delete("/{id}", function (Request $request, Response $response, $args){
+        $id = $args["id"];
+        $sql = "DELETE FROM activities WHERE id=:id";
+        $stmt = $this->db->prepare($sql);
+        
+        $data = [
+            ":id" => $id
+        ];
+
+        if($stmt->execute($data))
+        return $response->withJson(["status" => "success", "data" => "1"], 200);
+        
+        return $response->withJson(["status" => "failed", "data" => "0"], 200);
+    });
+});
