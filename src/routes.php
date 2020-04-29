@@ -4,6 +4,32 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Ramsey\Uuid\Uuid;
 
+// $app->group('api/', function () use ($app) {
+
+//     $app->post("/login", function (Request $request, Response $response, $args){
+//         $uuid4 = Uuid::uuid4();
+//         date_default_timezone_set('Asia/Jakarta');
+
+//         $new_activity = $request->getParsedBody();
+
+//         $sql = "UPDATE INTO users SET (:id, :name, :location, :account_id, :created_at)";
+//         $stmt = $this->db->prepare($sql);
+
+//         $data = [
+//             ":id" =>  $uuid4->toString(),
+//             ":name" => $new_activity["name"],
+//             ":location" => $new_activity["location"],
+//             ":account_id" => $new_activity["account_id"],
+//             ":created_at" => date("Y-m-d H:i:s")
+//         ];
+
+//         if($stmt->execute($data))
+//         return $response->withJson(["status" => "success", "data" => "1"], 200);
+        
+//         return $response->withJson(["status" => "failed", "data" => "0"], 200);
+//     });
+// });
+
 // API group activities
 $app->group('/api/activities', function () use ($app) {
 
@@ -61,4 +87,4 @@ $app->group('/api/activities', function () use ($app) {
         
         return $response->withJson(["status" => "failed", "data" => "0"], 200);
     });
-});
+})->add($middleware);
