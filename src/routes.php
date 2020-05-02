@@ -4,31 +4,47 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Ramsey\Uuid\Uuid;
 
-// $app->group('api/', function () use ($app) {
+$app->group('/api', function () use ($app) {
 
-//     $app->post("/login", function (Request $request, Response $response, $args){
-//         $uuid4 = Uuid::uuid4();
-//         date_default_timezone_set('Asia/Jakarta');
+    $app->post("/login", function (Request $request, Response $response, $args){
+        $uuid4 = Uuid::uuid4();
+        date_default_timezone_set('Asia/Jakarta');
 
-//         $new_activity = $request->getParsedBody();
+        $parse_body = $request->getParsedBody();
 
-//         $sql = "UPDATE INTO users SET (:id, :name, :location, :account_id, :created_at)";
-//         $stmt = $this->db->prepare($sql);
-
-//         $data = [
-//             ":id" =>  $uuid4->toString(),
-//             ":name" => $new_activity["name"],
-//             ":location" => $new_activity["location"],
-//             ":account_id" => $new_activity["account_id"],
-//             ":created_at" => date("Y-m-d H:i:s")
-//         ];
-
-//         if($stmt->execute($data))
-//         return $response->withJson(["status" => "success", "data" => "1"], 200);
+        $sql_check = "SELECT * FROM users WHERE email=:id AND password=:password";
+        $stmt_check = $this->db->prepare($sql_check);
         
-//         return $response->withJson(["status" => "failed", "data" => "0"], 200);
-//     });
-// });
+        $data_login = [
+            ":id" => $parse_body["email"],
+            ":password" => $parse_body["password"],
+        ];
+        $stmt_check->execute($data_login);
+        $result = $stmt_check->fetch();
+
+        if ($result) {
+            return $response->withJson(["status" => "success", "data" => $result], 200);
+        } else {
+            return $response->withJson(["status" => "failed", "data" => "0"], 200);
+        }
+
+        // $sql = "UPDATE INTO users SET (:id, :name, :location, :account_id, :created_at)";
+        // $stmt = $this->db->prepare($sql);
+
+        // $data = [
+        //     ":id" =>  $uuid4->toString(),
+        //     ":name" => $parse_body["name"],
+        //     ":location" => $parse_body["location"],
+        //     ":account_id" => $parse_body["account_id"],
+        //     ":created_at" => date("Y-m-d H:i:s")
+        // ];
+
+        // if($stmt->execute($data))
+        // return $response->withJson(["status" => "success", "data" => "1"], 200);
+        
+        // return $response->withJson(["status" => "failed", "data" => "0"], 200);
+    });
+});
 
 // API group activities
 $app->group('/api/activities', function () use ($app) {
